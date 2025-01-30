@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import * as L from "leaflet";
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
 const RouteLayer = ({ accessToken, start, end }) => {
   const map = useMap();
@@ -23,9 +25,9 @@ const RouteLayer = ({ accessToken, start, end }) => {
     const addRoute = async () => {
       try {
         const coordinates = `${start.join()};${end.join()}`;
-        const response = await fetch(
-          `https://api.jawg.io/routing/route/v1/car/${coordinates}?alternatives=false&geometries=geojson&overview=full&access-token=${accessToken}`
-        );
+        // const response = await fetch(
+        //   `https://api.jawg.io/routing/route/v1/car/${coordinates}?alternatives=false&geometries=geojson&overview=full&access-token=${accessToken}`
+        // );
         const data = await response.json();
 
         if (data.routes && data.routes.length > 0) {
@@ -93,19 +95,27 @@ const Map = () => {
   const end = [5.3698, 43.2965]; // Marseille [lng, lat]
 
   return (
-    <MapContainer
-      center={[46.5, 2.5]}
-      zoom={6}
-      style={{ height: "100vh", width: "100%" }}
-    >
-      <TileLayer
-        url={`https://tile.jawg.io/jawg-streets/{z}/{x}/{y}.png?access-token=${accessToken}`}
-        attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank" class="jawg-attrib">&copy; <b>Jawg</b>Maps</a> | <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap is open data licensed under ODbL" target="_blank" class="osm-attrib">&copy; OSM contributors</a>'
-        maxZoom={22}
-      />
-      {}
-      <RouteLayer accessToken={accessToken} start={start} end={end} />
-    </MapContainer>
+    <div>
+      <select>
+        <option value="Jour 1">Jour 1</option>
+        <option value="Jour 2">Jour 2</option>
+        <option value="Jour 3">Jour 3</option>
+      </select>
+
+      <MapContainer
+        center={[46.5, 2.5]}
+        zoom={6}
+        style={{ height: "100vh", width: "100%" }}
+      >
+        <TileLayer
+          url={`https://tile.jawg.io/jawg-streets/{z}/{x}/{y}.png?access-token=${accessToken}`}
+          attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank" class="jawg-attrib">&copy; <b>Jawg</b>Maps</a> | <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap is open data licensed under ODbL" target="_blank" class="osm-attrib">&copy; OSM contributors</a>'
+          maxZoom={22}
+        />
+        {}
+        <RouteLayer accessToken={accessToken} start={start} end={end} />
+      </MapContainer>
+    </div>
   );
 };
 
