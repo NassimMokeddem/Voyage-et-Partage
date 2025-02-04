@@ -1,5 +1,6 @@
 package com.example.voyage.services;
 
+import com.example.voyage.PlacesDTO;
 import com.example.voyage.entities.Places;
 import com.example.voyage.repositories.PlacesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,8 @@ public class PlacesService {
 
     }
 
-    public List<Places> getPlaces(){
-        return placesResRepository.findAll();
+    public List<PlacesDTO> getPlaces(Long id){
+        return placesResRepository.findPlaces(id);
     }
 
     public Places savePlaces(Places voyages) {
@@ -28,7 +29,7 @@ public class PlacesService {
     public Places getPlace(String voyageName) {
         return placesResRepository.findByNomPlace(voyageName);
     }
-    public List<String> getLocationAsText(Long id) {
+    public Object getLocationAsText(Long id) {
         return placesResRepository.findLocationAsText(id);
     }
 

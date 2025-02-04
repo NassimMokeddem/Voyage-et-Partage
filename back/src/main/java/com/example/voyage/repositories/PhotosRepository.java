@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface PhotosRepository extends JpaRepository<Photos,Long> {
-    @Query(value = "SELECT p.url  FROM photos p JOIN places pl ON p.place_id = pl.id WHERE pl.trip_day_id = :id", nativeQuery = true)
-    List<String> findPhotos(Long id);
+    @Query(value = "SELECT json_agg(json_build_object('url', url)) AS photos FROM photos WHERE place_id IN (SELECT id FROM places WHERE trip_day_id = :id); ", nativeQuery = true)
+    Object findPhotos(Long id);
 }

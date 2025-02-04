@@ -12,7 +12,7 @@ public class PhotosService {
     @Autowired
     PhotosRepository photosResRepository;
 
-    public List<String> findPhotos(Long id){
+    public Object findPhotos(Long id){
         return photosResRepository.findPhotos(id);
     }
 }

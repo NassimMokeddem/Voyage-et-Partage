@@ -47,10 +47,10 @@ public class RestServices {
         return tripsService.getVoyages();
     }
 
-//    @GetMapping("/getPlaces")
-//    public List<Places> getPlaces(){
-//        return placesService.getPlaces();
-//    }
+    @GetMapping("/getPlaces")
+    public List<PlacesDTO> getPlaces(Long id){
+        return placesService.getPlaces(id);
+    }
 //    public ResponseEntity<Point> getPlaces() {
 //        GeometryFactory gf = new GeometryFactory();
 //
@@ -61,16 +61,19 @@ public class RestServices {
 //    }
 
     @GetMapping("/getLocation")
-    public List<String> getLocation(@RequestParam Long id) {
+    public Object getLocation(@RequestParam Long id) {
         return placesService.getLocationAsText(id);
         //return location;
         //return ResponseEntity.ok(location);
     }
 
     @GetMapping("/getPhotos")
-    public List<String> getPhotos(@RequestParam Long id) {
+    public Object getPhotos(@RequestParam Long id) {
         return photosService.findPhotos(id);
     }
+
+//    @GetMapping("getAllInfos")
+//    public
 
 
     @PostMapping("/addVoyages")
