@@ -73,7 +73,10 @@ public class RestServices {
     }
 
 //    @GetMapping("getAllInfos")
-//    public
+//    public Object getAllInfos(@RequestParam Long id){
+//
+//        return jsonFile;
+//    }
 
 
     @PostMapping("/addVoyages")

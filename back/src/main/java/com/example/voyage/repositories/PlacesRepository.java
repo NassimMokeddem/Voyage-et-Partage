@@ -20,6 +20,13 @@ public interface PlacesRepository extends JpaRepository<Places,Long> {
     @Query(value = "SELECT json_agg(ST_AsGeoJSON(location)::json) FROM places WHERE trip_day_id = :tripDayId", nativeQuery = true)
     Object findLocationAsText(@Param("tripDayId") Long tripDayId);
 
-    @Query(value = "SELECT name, description, type, arrival_time, departure_time FROM places WHERE trip_day_id = :tripDayId", nativeQuery = true)
-    List<PlacesDTO> findPlaces(@Param("tripDayId") Long tripDayId);;
+//    @Query(value = "SELECT name, description, type, arrival_time, departure_time FROM places WHERE trip_day_id = :tripDayId", nativeQuery = true)
+//    List<PlacesDTO> findPlaces(@Param("tripDayId") Long tripDayId);
+
+
+//    @Query(value = "select name, description, type, arrival_time, departure_time, url, json_agg(ST_AsGeoJSON(location)::json) from places as pl, photos as ph where trip_day_id = 1 and pl.id = ph.place_id group by pl.name, pl.description, pl.type, pl.arrival_time, pl.departure_time, ph.url", nativeQuery = true)
+//    List<PlacesDTO> findPlaces(@Param("tripDayId") Long tripDayId);
+
+    @Query(value = "select name, description, type, arrival_time, departure_time, url, ST_AsText(location) as point from places as pl, photos as ph where trip_day_id = :tripDayId and pl.id = ph.place_id", nativeQuery = true)
+    List<PlacesDTO> findPlaces(@Param("tripDayId") Long tripDayId);
 }
