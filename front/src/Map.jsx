@@ -3,6 +3,8 @@ import { MapContainer, TileLayer, useMap, useMapEvents, Marker, Popup } from "re
 import "leaflet/dist/leaflet.css";
 import * as L from "leaflet";
 
+const accessToken = "31JhO7BoVix0fm9Kn4N91xaLyFspUroEOgrZNaQLIW0bgxoXTC0NhgPbeHmD24Me";
+
 // const RouteLayer = ({ accessToken, start, end }) => {
 
 //   const map = useMap();
@@ -47,6 +49,9 @@ import * as L from "leaflet";
 //               opacity: 0.6,
 //             },
 //           });
+
+//           caseLayer.removeFrom(map);
+//           mainRouteLayer.removeFrom(map);
 
 //           caseLayer.addTo(map);
 //           mainRouteLayer.addTo(map);
@@ -96,12 +101,101 @@ const removeAllMarkers = (map) => {
   });
 };
 
+const clearLayers = (map) => {
+  if (map.mainRouteLayer) {
+    map.removeLayer(map.mainRouteLayer);
+  }
+  if (map.caseLayer) {
+    map.removeLayer(map.caseLayer);
+  }
+  if (map.startEndLayer) {
+    map.removeLayer(map.startEndLayer);
+  }
+};
+
+const addRoute = async (places, map) => {
+  try {
+    let coordinates = ``;
+    places.forEach(place => {
+      coordinates = coordinates + place.coordinates.lng + "," + place.coordinates.lat + ";";
+    });
+
+    coordinates = coordinates.slice(0, -1)
+    
+    console.log(coordinates);
+    const response = await fetch(
+      `https://api.jawg.io/routing/route/v1/walk/${coordinates}?alternatives=false&geometries=geojson&overview=full&access-token=${accessToken}`
+    );
+    const data = await response.json();
+
+    if (data.routes && data.routes.length > 0) {
+      const route = data.routes[0].geometry;
+
+      clearLayers(map);
+
+      const mainRouteLayer = L.geoJSON(route, {
+        style: {
+          color: "#13BBFA",
+          weight: 4,
+          opacity: 0.8,
+        },
+      });
+
+      const caseLayer = L.geoJSON(route, {
+        style: {
+          color: "#4D93E3",
+          weight: 6,
+          opacity: 0.6,
+        },
+      });
+
+      caseLayer.addTo(map);
+      mainRouteLayer.addTo(map);
+
+      const startEndLayer = L.geoJSON(
+        {
+          type: "MultiPoint",
+          coordinates: [
+            route.coordinates[0],
+            route.coordinates[route.coordinates.length - 1],
+          ],
+        },
+        {
+          pointToLayer: (feature, latlng) => {
+            return L.circleMarker(latlng, {
+              radius: 8,
+              fillColor: "#13BBFA",
+              color: "#4D93E3",
+              weight: 3,
+              opacity: 1,
+              fillOpacity: 0.9,
+            });
+          },
+        }
+      );
+
+      startEndLayer.addTo(map);
+
+      map.fitBounds(mainRouteLayer.getBounds());
+
+      map.mainRouteLayer = mainRouteLayer;
+      map.caseLayer = caseLayer;
+      map.startEndLayer = startEndLayer;
+    }
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de l'itinéraire :", error);
+  }
+};
+
 
 const AddMarker = ({ places }) => {
   const map = useMap();
 
   useEffect(() => {
     console.log(places)
+
+    removeAllMarkers(map);
+
     if (places[0] !== undefined) {
       places.forEach((place) => {
         L.marker([place.coordinates.lat, place.coordinates.lng])
@@ -117,9 +211,9 @@ const AddMarker = ({ places }) => {
           .bindTooltip(place.name, {permanent: true, direction: "auto" })
           .addTo(map);
       })
-      map.setView([places[0].coordinates.lat, places[0].coordinates.lng], 13);
+      map.setView([places[0].coordinates.lat, places[0].coordinates.lng], 15);
+      addRoute(places, map);
     }else{
-      removeAllMarkers(map);
       map.setView([46.5, 2.5], 6);
     }
     
@@ -130,7 +224,6 @@ const AddMarker = ({ places }) => {
 
 
 const Map = () => {
-  const accessToken = "31JhO7BoVix0fm9Kn4N91xaLyFspUroEOgrZNaQLIW0bgxoXTC0NhgPbeHmD24Me";
   const start = [2.3522, 48.8566]; // Paris [lng, lat]
   const end = [5.3698, 43.2965]; // Marseille [lng, lat]
 
@@ -156,6 +249,8 @@ const Map = () => {
       dayId = 2;
     } else if (selectedValue === "Jour 3") {
       dayId = 3;
+    } else if (selectedValue === "Jour 4") {
+      dayId = 4;
     }
 
     if (dayId > 0) {
@@ -184,20 +279,22 @@ const Map = () => {
         <option value="Jour 1">Jour 1</option>
         <option value="Jour 2">Jour 2</option>
         <option value="Jour 3">Jour 3</option>
+        <option value="Jour 4">Jour 4</option>
       </select>
-
-      <MapContainer
-        center={[46.5, 2.5]}
-        zoom={6}
-        style={{ height: "100vh", width: "100%" }}
-      >
-        <TileLayer
-          url={`https://tile.jawg.io/jawg-streets/{z}/{x}/{y}.png?access-token=${accessToken}`}
-          attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank" class="jawg-attrib">&copy; <b>Jawg</b>Maps</a> | <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap is open data licensed under ODbL" target="_blank" class="osm-attrib">&copy; OSM contributors</a>'
-          maxZoom={22}
-        />
-        <AddMarker places = {places}/>
-      </MapContainer>
+      <div> {/*Modifier pour la taille de carte et de la page web*/}
+        <MapContainer
+          center={[46.5, 2.5]}
+          zoom={6}
+          style={{ height: "100vh", width: "100%" }}
+        >
+          <TileLayer
+            url={`https://tile.jawg.io/jawg-streets/{z}/{x}/{y}.png?access-token=${accessToken}`}
+            attribution='<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank" class="jawg-attrib">&copy; <b>Jawg</b>Maps</a> | <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap is open data licensed under ODbL" target="_blank" class="osm-attrib">&copy; OSM contributors</a>'
+            maxZoom={22}
+          />
+          <AddMarker places = {places}/>
+        </MapContainer>
+      </div>
     </div>
   );
 };
